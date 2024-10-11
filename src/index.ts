@@ -1,7 +1,7 @@
 /**
  * @package @ivandewolf/spinners
  * @version 0.0.1
- * @description An awesome package which uses spinners for dev and build commands
+ * @description An awesome package for cool spinners in the terminal.
  *
  * @license MIT
  */
