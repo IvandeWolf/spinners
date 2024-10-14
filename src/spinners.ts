@@ -44,6 +44,8 @@ export class Spinners {
    *
    */
   private spin() {
+    this.calculateFrameCount();
+
     this.constructOutput();
 
     cliCursor.hide();
@@ -97,8 +99,6 @@ export class Spinners {
       this.spinners.push(spinners);
       this.lineCount++;
     }
-
-    this.calculateFrameCount();
   }
 
   /**

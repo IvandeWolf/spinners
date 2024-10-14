@@ -87,11 +87,7 @@ export class Spinner {
    * @param name
    * @param options
    */
-  constructor(
-    name: string,
-    label: string,
-    state: State = DEFAULTSTATES[0],
-  ) {
+  constructor(name: string, label: string, state: State = DEFAULTSTATES[0]) {
     this.name = name;
     this.label = label;
 
