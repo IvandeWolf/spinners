@@ -81,16 +81,22 @@ export class Spinner {
   public state: State;
   public name: string;
   public label: string;
+  public indent: number;
 
   /**
    *
    * @param name
    * @param options
    */
-  constructor(name: string, label: string, state: State = DEFAULTSTATES[0]) {
+  constructor(
+    name: string,
+    label: string,
+    state: State = DEFAULTSTATES[0],
+    indent = 0,
+  ) {
     this.name = name;
     this.label = label;
-
+    this.indent = indent;
     this.state = state;
   }
 

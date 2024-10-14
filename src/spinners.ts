@@ -62,7 +62,7 @@ export class Spinners {
     this.spinners.forEach((spinner: Spinner) => {
       let index = this.frameIndex % spinner.state.frames.length;
       let frame = spinner.state.frames[index];
-      let line: string = `${chalk[spinner.state.prefixColor](frame)}  ${chalk[spinner.state.color](spinner.label)}`;
+      let line: string = `${' '.repeat(spinner.indent)}${spinner.indent > 0 ? '⤷ ' : ''}${chalk[spinner.state.prefixColor](frame)}  ${chalk[spinner.state.color](spinner.label)}`;
 
       linesLength.push(line.length);
       output += `${line}\n`;
