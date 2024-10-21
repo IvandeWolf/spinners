@@ -76,6 +76,10 @@ export class Spinner {
 
   public update(state: State) {
     this.state = state;
+
+    if (this.state.frameColor === undefined) {
+      this.state.frameColor = this.state.color;
+    }
   }
 
   public getFrames(): string[] {
