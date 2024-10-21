@@ -2,11 +2,10 @@
  *
  */
 
-// import readline from 'readline';
+import readline from 'readline';
 import cliCursor from 'cli-cursor';
-import { Spinner, SpinnerOptions } from './spinner.js';
+import { Spinner } from './spinner.js';
 import { cleanStream, writeStream } from './utils.js';
-import chalk from 'chalk';
 
 export class Spinners {
   private spinners: Spinner[] = [];
@@ -25,19 +24,8 @@ export class Spinners {
     this.interval = setInterval(() => {
       this.spin();
     }, this.intervalTimeout);
-  }
 
-  /**
-   *
-   * @param spinner
-   * @returns
-   */
-  private get(spinner: Spinner | string) {
-    if (typeof spinner === 'string') {
-      return this.spinners.find((s) => s.name === spinner);
-    }
-
-    return spinner;
+    this.bindSigint();
   }
 
   /**
@@ -60,16 +48,15 @@ export class Spinners {
     let output: string = '';
     const linesLength: number[] = [];
     this.spinners.forEach((spinner: Spinner) => {
-      let index = this.frameIndex % spinner.state.frames.length;
-      let frame = spinner.state.frames[index];
-      let line: string = `${' '.repeat(spinner.indent)}${spinner.indent > 0 ? '⤷ ' : ''}${chalk[spinner.state.prefixColor](frame)}  ${chalk[spinner.state.color](spinner.label)}`;
+      let line = spinner.getOutput(this.frameIndex);
 
       linesLength.push(line.length);
       output += `${line}\n`;
     });
 
+    if (this.spinners.length == 0) readline.clearScreenDown(this.stream);
     writeStream(this.stream, output, linesLength);
-    cleanStream(this.stream, linesLength);
+    if (this.spinners.length > 0) cleanStream(this.stream, linesLength);
     this.lineCount = linesLength.length;
   }
 
@@ -77,14 +64,10 @@ export class Spinners {
    *
    */
   private calculateFrameCount() {
-    let maxFrames = 0;
-    this.spinners.forEach((spinner) => {
-      if (spinner.state.frames.length > maxFrames) {
-        maxFrames = spinner.state.frames.length;
-      }
-    });
-
-    this.frameCount = maxFrames;
+    this.frameCount = Math.max(
+      0,
+      ...this.spinners.map((spinner) => spinner.getFrames().length),
+    );
   }
 
   /**
@@ -106,10 +89,19 @@ export class Spinners {
    * @param spinner
    * @returns
    */
-  public remove(spinner: Spinner | string) {
-    let sp = this.get(spinner);
-    if (!sp) return;
+  public remove(spinner: Spinner) {
+    this.spinners = this.spinners.filter(s => s !== spinner);
+  }
 
-    this.spinners = this.spinners.filter((s) => s !== sp);
+  /**
+   * 
+   */
+  public bindSigint() {
+    process.removeAllListeners('SIGINT');
+    process.on('SIGINT', () => {
+      cliCursor.show();
+      readline.moveCursor(process.stderr, 0, this.lineCount);
+      process.exit(0);
+    });
   }
 }

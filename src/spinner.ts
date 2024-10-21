@@ -1,12 +1,13 @@
+import chalk from 'chalk';
+
 /**
  * @class spinner
  */
 
 export type State = {
-  name: string;
   frames: string[];
   color: Color;
-  prefixColor: Color;
+  frameColor?: Color;
 };
 
 export enum Color {
@@ -28,50 +29,26 @@ export enum Color {
   'whiteBright' = 'whiteBright',
 }
 
-export const DEFAULTSTATES: State[] = [
-  {
-    name: 'busy',
+export const DEFAULTSTATES = {
+  empty: {
+    frames: [],
+    color: Color.white,
+  },
+  busy: {
     frames: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
     color: Color.white,
-    prefixColor: Color.white,
-  },
-  {
-    name: 'success',
+  } as State,
+  success: {
     frames: ['✓'],
     color: Color.green,
     prefixColor: Color.greenBright,
-  },
-  {
-    name: 'error',
+  } as State,
+  error: {
     frames: ['✖'],
     color: Color.red,
     prefixColor: Color.redBright,
-  },
-  {
-    name: 'warning',
-    frames: ['!'],
-    color: Color.yellow,
-    prefixColor: Color.yellow,
-  },
-  {
-    name: 'info',
-    frames: ['i'],
-    color: Color.blue,
-    prefixColor: Color.blue,
-  },
-  {
-    name: 'star',
-    frames: ['★'],
-    color: Color.yellow,
-    prefixColor: Color.yellowBright,
-  },
-  {
-    name: 'pointer',
-    frames: ['❯'],
-    color: Color.white,
-    prefixColor: Color.white,
-  },
-];
+  } as State,
+};
 
 export type SpinnerOptions = {
   state: State;
@@ -79,7 +56,6 @@ export type SpinnerOptions = {
 
 export class Spinner {
   public state: State;
-  public name: string;
   public label: string;
   public indent: number;
 
@@ -88,19 +64,45 @@ export class Spinner {
    * @param name
    * @param options
    */
-  constructor(
-    name: string,
-    label: string,
-    state: State = DEFAULTSTATES[0],
-    indent = 0,
-  ) {
-    this.name = name;
+  constructor(label: string, state: State = DEFAULTSTATES.empty, indent = 0) {
     this.label = label;
     this.indent = indent;
     this.state = state;
+
+    if (this.state.frameColor === undefined) {
+      this.state.frameColor = this.state.color;
+    }
   }
 
   public update(state: State) {
     this.state = state;
+  }
+
+  public getFrames(): string[] {
+    return this.state.frames || [];
+  }
+
+  public getOutput(index: number): string {
+    let output = '';
+
+    if (this.indent > 0) {
+      output += ' '.repeat(this.indent);
+      output += '⤷ ';
+    }
+
+    if (this.getFrames().length == 0) {
+      output += `${chalk[this.state.color](this.label)}`;
+      return output;
+    }
+
+    /* We will never return here, because the frameColor gets set in the constructor */
+    if (this.state.frameColor === undefined) return '';
+
+    index %= this.getFrames().length;
+
+    let frame = this.getFrames()[index];
+    output += `${chalk[this.state.frameColor](frame)} ${chalk[this.state.color](this.label)}`;
+
+    return output;
   }
 }
